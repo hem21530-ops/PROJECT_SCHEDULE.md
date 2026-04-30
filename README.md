@@ -6,6 +6,108 @@
 - **Nathan (Lead):** Calculus derivations, fitting logic, physics interpretation, code verification
 - **Drake (Coder):** Python implementation, numerical integration, plotting, fitting loops
 - **Corbin (Secondary Math + Writing):** Algebraic computations, unit conversions, residuals, dark matter fraction, trapezoidal rule spot-checks, paper writing, slides
+  # Prerequisite Skills for Astronomy 35
+## Before First Day (September 1, 2026)
+
+This document lists everything each team member must be able to do **before** the project starts. No overlap. No "learn as you go." These are the non-negotiable starting skills.
+
+---
+
+## Shared Baseline (All Three)
+
+| Skill | Level Required | Why |
+| :--- | :--- | :--- |
+| Read a scientific paper | Find abstract, identify main result, ignore irrelevant details | Background research and writing introduction |
+| Use Google Sheets or Excel | Basic formulas (multiplication, division, sums, cell references) | Shared data tracking |
+| Communicate in a group chat | Respond within 24 hours, ask questions, say "I don't know" | Project coordination |
+| Show up to scheduled meetings | 1 hour/day weekdays, 45 min Thursday, ~20 min weekends | Mandatory for 110‑hour requirement |
+
+---
+
+## Nathan (Lead)
+
+| Need | Level Required | Why |
+| :--- | :--- | :--- |
+| **Set up mass integral** | Write $M(r) = \int_0^r 4\pi r'^2 \rho(r') dr'$ from memory | Foundational for both NFW and Einasto |
+| **Power rule integration** | $\int r^n dr = r^{n+1}/(n+1)$, including $n=-1$ case ($\ln|r|$) | Needed for NFW derivation |
+| **u‑substitution** | Recognize when $\int \frac{dr}{r}$ appears and integrate correctly | Part of NFW derivation |
+| **Derive NFW enclosed mass** | From $\rho(r) = \frac{\rho_0}{(r/r_s)(1+r/r_s)^2}$ to $M(r) = 4\pi\rho_0 r_s^3 \left[ \ln(1+x) - \frac{x}{1+x} \right]$, $x = r/r_s$ | Core math of the project |
+| **Recognize Einasto has no closed form** | Understand that $M(r) = \int_0^r 4\pi r'^2 \rho_0 \exp\left[-2n((r'/r_s)^{1/n}-1)\right] dr'$ has no elementary antiderivative | Directs coder to use numerical integration |
+| **Derive orbital velocity** | From $F_g = F_c$: $\frac{GM(r)m}{r^2} = \frac{mv^2}{r} \implies v(r) = \sqrt{\frac{GM(r)}{r}}$ | Core physics equation |
+| **Explain parameters** | $\rho_0$ = central density, $r_s$ = scale radius, $n$ = shape parameter (Einasto) | Needed for interpreting fit results |
+| **Check coder's output** | Look at best-fit $v_{\text{model}}(r)$ and tell if obviously wrong (negative, wildly oscillating) | Quality control |
+| **Interpret dark matter fraction** | $f_{\text{DM}}(r) = M_{\text{DM}}(r) / [M_{\text{vis}}(r) + M_{\text{DM}}(r)]$; understand $f_{\text{DM}} \to 1$ at large $r$ | Explaining results |
+
+**Nathan does not need to:**
+- Write Python code
+- Do numerical integration manually
+- Write the paper (Corbin's job)
+- Format citations
+
+---
+
+## Drake (Coder)
+
+| Need | Level Required | Why |
+| :--- | :--- | :--- |
+| **Read SPARC data files** | `numpy.loadtxt` or `pandas.read_csv` to import columns | Get observed data into Python |
+| **Store data in arrays** | NumPy arrays for radius, velocity, error, surface brightness | Efficient numerical operations |
+| **Write arrays to a file** | Save cleaned or transformed data | Data persistence |
+| **Define NFW enclosed mass function** | Python function that takes $r$, $\rho_0$, $r_s$ and returns $M(r)$ using Nathan's derived formula | Model definition |
+| **Define Einasto density function** | Python function that returns $\rho(r)$ given $r$, $\rho_0$, $r_s$, $n$ | Input to numerical integrator |
+| **Implement numerical integration (trapezoidal rule)** | For a given $r$, compute $\int_0^r 4\pi r'^2 \rho(r') dr'$ using a loop over $r'$ | Einasto has no closed form |
+| **Implement curve fitting** | `scipy.optimize.curve_fit` to find best-fit $\rho_0$, $r_s$, $n$ | Parameter estimation |
+| **Return fit errors** | Extract covariance matrix from `curve_fit` | Error analysis |
+| **Make scatter plot with error bars** | `matplotlib.pyplot.errorbar(x, y, yerr=err, fmt='o')` | Visualize observed data |
+| **Overplot model curve** | `matplotlib.pyplot.plot(r_array, v_model(r_array))` on same axes | Compare model to data |
+| **Add labels, legend, title** | Basic plot formatting | Presentable figures |
+| **Save figure as PNG or PDF** | `matplotlib.pyplot.savefig('filename.png')` | For paper and presentation |
+
+**Drake does not need to:**
+- Derive NFW enclosed mass (Nathan does that)
+- Explain physical meaning of parameters (Nathan does that)
+- Write the paper (Corbin does that)
+- Do unit conversions (Corbin does that)
+
+---
+
+## Corbin (Secondary Math + Writing)
+
+| Need | Level Required | Why |
+| :--- | :--- | :--- |
+| **Unit conversions** | Convert SPARC data: <br> $1\text{ kpc}=3.086\times10^{19}\text{ m}$ <br> $1 M_\odot=1.989\times10^{30}\text{ kg}$ <br> $G=6.674\times10^{-11}\text{ m}^3/\text{kg}/\text{s}^2$ <br> $G=4.3009\times10^{-3}\text{ (km/s)}^2\cdot\text{kpc}/M_\odot$ | Raw data must be in usable units |
+| **Convert surface brightness to mass** | Multiply surface brightness (Jy beam⁻¹) by mass‑to‑light ratio | Compute $M_{\text{vis}}(r)$ |
+| **Compute visible‑only velocity** | $v_{\text{vis}}(r) = \sqrt{G M_{\text{vis}}(r)/r}$ | Baseline comparison |
+| **Compute residuals** | $v_{\text{obs}}(r) - v_{\text{model}}(r)$ for each radius | Quantify fit quality point‑by‑point |
+| **Compute $\chi^2$ (simplified)** | $\sum (v_{\text{obs}} - v_{\text{model}})^2$ (if errors not used) | Rough goodness‑of‑fit |
+| **Compute dark matter fraction** | $f_{\text{DM}}(r) = M_{\text{DM}}(r) / [M_{\text{vis}}(r) + M_{\text{DM}}(r)]$ | Main result: how much mass is dark? |
+| **Create results table** | Organize best-fit $\rho_0$, $r_s$, $n$ with uncertainties per galaxy | For paper and presentation |
+| **Trapezoidal rule (spot‑check)** | For one radius, manually compute $\int_0^r 4\pi r'^2 \rho_{\text{Einasto}}(r') dr'$ using spreadsheet | Validate Drake's numerical integration |
+| **Write paper introduction** | Background: Vera Rubin, flat rotation curves, need for dark matter | Literature review |
+| **Write methods section (non‑math)** | Describe SPARC data, galaxy selection, fitting procedure | Reproducibility |
+| **Write results section** | Describe tables and figures (what they show, not interpretation) | Data presentation |
+| **Write discussion section** | Compare NFW vs. Einasto, mention limitations | Interpretation (with Nathan's input) |
+| **Write conclusion section** | Summarize findings, suggest future work | Paper ending |
+| **Format citations (APA or AAS)** | In‑text citations and reference list | Academic requirement |
+| **Make presentation slides (RASC)** | 10‑12 slides with key figures and bullet points | Final deliverable |
+| **Present slides** | Speak clearly, keep within time limit | RASC presentation |
+
+**Corbin does not need to:**
+- Derive anything (Nathan does that)
+- Write Python code (Drake does that)
+- Do calculus (trapezoidal rule is arithmetic, only for spot‑check)
+
+---
+
+## Summary Table (Before Day 1)
+
+| Person | Most Important Single Skill | Why |
+| :--- | :--- | :--- |
+| **Nathan** | Derive $M_{\text{NFW}}(r)$ from $\rho(r)$ using integration | Without this, no model exists |
+| **Drake** | Read SPARC data and make scatter plot with error bars | Without this, no data to fit |
+| **Corbin** | Do unit conversions and write coherent paper section | Without this, no paper |
+
+All other skills can be learned during the project, but these are the non‑negotiable starting points.
 
 **Classroom Context:** Astronomy 35 – no dedicated classroom, self-directed research room, teacher available but not present most of the time.
 
